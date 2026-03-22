@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Buddy</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   HUB STYLES
+══════════════════════════════════════ */
+:root {
+    --bg: #0b0d14;
+    --surface: #13161f;
+    --card: #1a1d2e;
+    --card2: #21253a;
+    --border: #2a2d42;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --accent: #6ee7b7;
+
+    /* Subject colours */
+    --science:  #6ee7b7;
+    --maths:    #818cf8;
+    --english:  #fb923c;
+    --history:  #f472b6;
+    --geography:#38bdf8;
+    --art:      #facc15;
+    --default:  #94a3b8;
+
+    --side-pad: clamp(16px, 5vw, 60px);
+    --content-max: 1000px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: clamp(28px, 4vw, 52px) var(--side-pad) clamp(22px, 3vw, 40px);
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(160deg, #131828 0%, #0b0d14 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -40px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(110,231,183,0.07) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: clamp(16px, 2.5vw, 28px);
+  }
+  .brand-logo {
+    width: clamp(40px, 5vw, 54px);
+    height: clamp(40px, 5vw, 54px);
+    background: linear-gradient(135deg, #6ee7b7, #818cf8);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(20px, 2.5vw, 28px);
+    flex-shrink: 0;
+  }
+  .brand-text h1 {
+    font-size: clamp(22px, 3.5vw, 38px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+  }
+  .brand-text p {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(9px, 1vw, 12px);
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Year tab strip */
+  .year-tabs {
+    display: flex;
+    gap: clamp(6px, 1vw, 10px);
+    flex-wrap: wrap;
+  }
+  .year-tab {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 700;
+    padding: clamp(6px, 0.8vw, 9px) clamp(14px, 1.8vw, 22px);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .year-tab.active {
+    background: var(--card);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .year-tab.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .year-tab .lock-icon {
+    font-size: 10px;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+  .year-tab:not(.locked):not(.active):hover {
+    border-color: #3d4260;
+    color: #94a3b8;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: clamp(24px, 4vw, 48px) var(--side-pad) 80px;
+  }
+
+  /* Semester label */
+  .sem-label {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(9px, 1vw, 11px);
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: clamp(28px, 4vw, 44px) 0 clamp(12px, 1.5vw, 18px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sem-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Subject grid */
+  .subject-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(240px, 28vw, 300px), 1fr));
+    gap: clamp(12px, 1.8vw, 20px);
+    margin-bottom: clamp(12px, 1.5vw, 18px);
+  }
+
+  /* Subject card */
+  .subject-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: clamp(12px, 1.5vw, 18px);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    animation: cardIn 0.3s ease both;
+  }
+  .subject-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  .subject-card.locked {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .subject-card.coming-soon {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Colour accent strip at top of card */
+  .card-strip {
+    height: clamp(4px, 0.5vw, 6px);
+    width: 100%;
+  }
+
+  .card-body {
+    padding: clamp(16px, 2vw, 22px);
+  }
+  .card-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(9px, 0.9vw, 11px);
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .card-subject {
+    font-size: clamp(17px, 2vw, 22px);
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .card-topic {
+    font-size: clamp(12px, 1.2vw, 13px);
+    color: var(--muted);
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: clamp(14px, 1.8vw, 20px);
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card-stats {
+    display: flex;
+    gap: clamp(10px, 1.2vw, 16px);
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-val {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(14px, 1.6vw, 18px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: clamp(9px, 0.9vw, 11px);
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .card-btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(12px, 1.2vw, 13px);
+    font-weight: 800;
+    border: none;
+    border-radius: 8px;
+    padding: clamp(7px, 0.9vw, 10px) clamp(14px, 1.8vw, 18px);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .card-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* Coming soon card overlay */
+  .coming-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    padding: 3px 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Add new set button */
+  .add-card {
+    background: transparent;
+    border: 1.5px dashed var(--border);
+    border-radius: clamp(12px, 1.5vw, 18px);
+    padding: clamp(20px, 2.5vw, 28px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(13px, 1.3vw, 15px);
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    margin-top: clamp(8px, 1vw, 12px);
+  }
+  .add-card:hover {
+    border-color: var(--accent2);
+    background: rgba(129,140,248,0.05);
+    color: #c7d2fe;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: clamp(24px, 3vw, 36px);
+    width: 100%;
+    max-width: 480px;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal h2 {
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .modal p {
+    font-size: clamp(13px, 1.3vw, 14px);
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: clamp(18px, 2.5vw, 28px);
+  }
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: clamp(18px, 2.5vw, 26px);
+  }
+  .modal-option {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: left;
+  }
+  .modal-option:hover { border-color: var(--accent2); background: #1e2235; }
+  .modal-option.selected { border-color: var(--accent); background: #0d2018; }
+  .modal-option .opt-label {
+    font-size: clamp(11px, 1.1vw, 13px);
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .modal-option .opt-val {
+    font-size: clamp(14px, 1.5vw, 16px);
+    font-weight: 800;
+    color: #e2e8f0;
+  }
+  .modal-section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .btn-cancel {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .btn-cancel:hover { border-color: #3d4260; }
+  .btn-confirm {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #0b0d14;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 9px 24px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-confirm:hover { opacity: 0.85; }
+  .btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: clamp(32px, 5vw, 60px) 20px;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: clamp(32px, 5vw, 48px); margin-bottom: 12px; }
+  .empty-state p { font-size: clamp(13px, 1.3vw, 15px); line-height: 1.6; }
+
+  /* ── SCORE BADGE ── */
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(110,231,183,0.12);
+    border: 1px solid rgba(110,231,183,0.2);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 1vw, 12px);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .subject-grid { grid-template-columns: 1fr; }
+    .modal-grid { grid-template-columns: 1fr; }
+    .year-tab .lock-icon { display: none; }
+  }
+  @media (min-width: 768px) {
+    .subject-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1100px) {
+    .subject-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+/* ── SHARED NAV ── */
+.sb-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(10px,1.5vw,14px) clamp(16px,3vw,40px);
+  background: rgba(11,13,20,0.96);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+.sb-back {
+  background: none; border: none;
+  color: #818cf8;
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(12px,1.2vw,14px);
+  font-weight: 700;
+  cursor: pointer; padding: 0;
+  transition: color 0.15s;
+}
+.sb-back:hover { color: #a5b4fc; }
+.sb-breadcrumb {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(9px,0.9vw,11px);
+  color: #64748b; letter-spacing: 0.5px;
+}
+
+/* ── VIEW CONTAINERS ── */
+#view-hub { display: block; }
+#view-test {
+  display: none;
+  min-height: 100vh;
+  overflow-y: auto;
+  background: #0f1117;
+}
+
+/* ══════════════════════════════════════
+   SCIENCE TEST STYLES
+   (scoped inside #view-test)
+══════════════════════════════════════ */
+
+/* CSS custom properties for the test, scoped to #view-test */
+#view-test {
+--bg: #0f1117;
+    --card: #1a1d2e;
+    --card2: #21253a;
+    --accent: #6ee7b7;
+    --accent2: #818cf8;
+    --accent3: #fb923c;
+    --wrong: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #2d3248;
+    --correct-bg: #052e16;
+    --wrong-bg: #2d0a0a;
+
+    /* Fluid spacing scale */
+    --space-sm: clamp(8px, 1.2vw, 14px);
+    --space-md: clamp(14px, 2vw, 24px);
+    --space-lg: clamp(20px, 3vw, 40px);
+    --content-max: 860px;
+    --side-pad: clamp(16px, 4vw, 48px);
+}
+
+
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  #view-test {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+    font-size: clamp(14px, 1.5vw, 16px);
+  }
+
+  /* ── STUDY BUDDY NAV ── */
+  .sb-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(10px, 1.5vw, 14px) clamp(16px, 3vw, 40px);
+    background: rgba(15,17,23,0.95);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .sb-back {
+    color: var(--accent2);
+    text-decoration: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 700;
+    transition: color 0.15s;
+  }
+  .sb-back:hover { color: #a5b4fc; }
+  .sb-breadcrumb {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(9px, 0.9vw, 11px);
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #1a1d2e 0%, #0f1117 60%);
+    border-bottom: 2px solid var(--border);
+    padding: clamp(24px, 4vw, 48px) var(--side-pad) clamp(20px, 3vw, 36px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: -60px;
+    width: clamp(160px, 20vw, 280px); height: clamp(160px, 20vw, 280px);
+    background: radial-gradient(circle, rgba(110,231,183,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: clamp(140px, 18vw, 240px); height: clamp(140px, 18vw, 240px);
+    background: radial-gradient(circle, rgba(129,140,248,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-label {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 1vw, 12px);
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-size: clamp(24px, 4vw, 42px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.15;
+  }
+  header h1 span { color: var(--accent); }
+  .subtitle {
+    margin-top: 8px;
+    font-size: clamp(13px, 1.3vw, 16px);
+    color: var(--muted);
+  }
+  .progress-bar-wrap {
+    max-width: min(640px, 100%);
+    margin: clamp(16px, 2vw, 24px) auto 0;
+    background: var(--border);
+    border-radius: 99px;
+    height: clamp(6px, 0.8vw, 10px);
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 1vw, 12px);
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* ── MAIN CONTENT AREA ── */
+  main {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: var(--space-lg) var(--side-pad) 0;
+  }
+
+  /* On larger screens, give questions a comfortable reading width */
+  @media (min-width: 900px) {
+    main { padding-top: 36px; }
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1.5vw, 16px);
+    margin: clamp(28px, 4vw, 52px) 0 clamp(12px, 1.5vw, 20px);
+  }
+  .section-icon {
+    width: clamp(32px, 4vw, 44px);
+    height: clamp(32px, 4vw, 44px);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(16px, 2vw, 22px);
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: clamp(15px, 1.8vw, 20px);
+    font-weight: 800;
+    color: #fff;
+  }
+  .section-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(9px, 0.9vw, 11px);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ── QUESTION CARDS ── */
+  .q-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: clamp(12px, 1.5vw, 18px);
+    padding: clamp(16px, 2.5vw, 28px);
+    margin-bottom: clamp(12px, 1.5vw, 18px);
+    transition: border-color 0.2s;
+  }
+  .q-card:hover { border-color: #3d4260; }
+  .q-num {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 1vw, 12px);
+    color: var(--muted);
+    margin-bottom: clamp(6px, 0.8vw, 10px);
+  }
+  .q-text {
+    font-size: clamp(14px, 1.5vw, 17px);
+    font-weight: 700;
+    line-height: 1.55;
+    color: #e2e8f0;
+    margin-bottom: clamp(12px, 1.5vw, 18px);
+  }
+
+  /* ── OPTIONS ── */
+  .options { display: flex; flex-direction: column; gap: clamp(7px, 0.9vw, 10px); }
+  .option-btn {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(13px, 1.4vw, 15px);
+    font-weight: 600;
+    padding: clamp(9px, 1.1vw, 13px) clamp(12px, 1.5vw, 18px);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    display: flex; align-items: center; gap: clamp(8px, 1vw, 12px);
+    line-height: 1.45;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: #282d44;
+    border-color: var(--accent2);
+    transform: translateX(3px);
+  }
+  .option-btn .opt-letter {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 1vw, 12px);
+    color: var(--muted);
+    min-width: 18px;
+    flex-shrink: 0;
+  }
+  .option-btn.correct {
+    background: var(--correct-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .option-btn.correct .opt-letter { color: var(--accent); }
+  .option-btn.wrong {
+    background: var(--wrong-bg);
+    border-color: var(--wrong);
+    color: var(--wrong);
+  }
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn:disabled { cursor: default; transform: none; }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    margin-top: clamp(10px, 1.2vw, 16px);
+    padding: clamp(10px, 1.2vw, 14px) clamp(12px, 1.5vw, 18px);
+    border-radius: 9px;
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 600;
+    display: none;
+    line-height: 1.6;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: var(--correct-bg); color: var(--accent); border: 1px solid rgba(110,231,183,0.3); }
+  .feedback.wrong-fb { background: var(--wrong-bg); color: #fca5a5; border: 1px solid rgba(248,113,113,0.3); }
+
+  /* ── SHORT ANSWER ── */
+  .short-answer-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .short-answer-wrap input, .short-answer-wrap textarea {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(13px, 1.3vw, 15px);
+    padding: clamp(9px, 1.1vw, 13px) clamp(12px, 1.5vw, 16px);
+    width: 100%;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .short-answer-wrap input:focus, .short-answer-wrap textarea:focus {
+    outline: none;
+    border-color: var(--accent2);
+  }
+  .check-btn {
+    align-self: flex-start;
+    background: var(--accent2);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 800;
+    padding: clamp(7px, 0.9vw, 10px) clamp(14px, 1.8vw, 22px);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .check-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* ── SCORE SECTION ── */
+  #score-section {
+    display: none;
+    margin: clamp(28px, 4vw, 52px) 0 0;
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: clamp(14px, 2vw, 22px);
+    padding: clamp(24px, 3.5vw, 44px) clamp(20px, 3vw, 40px);
+    text-align: center;
+  }
+  #score-section h2 {
+    font-size: clamp(22px, 2.8vw, 34px);
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  #score-section .big-score {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(44px, 6vw, 72px);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin: clamp(10px, 1.5vw, 18px) 0;
+  }
+  #score-section .score-sub {
+    font-size: clamp(13px, 1.3vw, 16px);
+    color: var(--muted);
+    margin-bottom: clamp(14px, 2vw, 24px);
+  }
+  #score-section .breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(clamp(110px, 14vw, 150px), 1fr));
+    gap: clamp(8px, 1vw, 12px);
+    margin: clamp(14px, 2vw, 22px) 0 clamp(18px, 2.5vw, 30px);
+  }
+  .breakdown-item {
+    background: var(--card2);
+    border-radius: 10px;
+    padding: clamp(10px, 1.2vw, 16px) clamp(8px, 1vw, 12px);
+  }
+  .breakdown-item .b-label {
+    font-size: clamp(10px, 0.9vw, 12px);
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .breakdown-item .b-val { font-size: clamp(16px, 2vw, 24px); font-weight: 900; }
+
+  #submit-btn, #reset-btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(14px, 1.4vw, 17px);
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    padding: clamp(11px, 1.3vw, 16px) clamp(24px, 3vw, 44px);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  #submit-btn {
+    background: var(--accent);
+    color: #0f1117;
+    margin: clamp(24px, 3vw, 44px) auto 0;
+    display: block;
+  }
+  #submit-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+  #reset-btn { background: var(--accent2); color: #fff; }
+  #reset-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+
+  /* ── MODE TOGGLE ── */
+  .mode-toggle {
+    display: inline-flex;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+    margin: clamp(14px, 2vw, 22px) auto 0;
+  }
+  .mode-btn {
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    color: #94a3b8;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(12px, 1.2vw, 15px);
+    font-weight: 700;
+    padding: clamp(6px, 0.8vw, 9px) clamp(12px, 1.5vw, 20px);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .mode-btn.mode-active { background: var(--card2); color: #fff; }
+  .mode-btn:hover:not(.mode-active) { color: #cbd5e1; }
+  .mode-hint {
+    font-size: clamp(11px, 1.1vw, 13px);
+    color: var(--muted);
+    margin: 8px auto 0;
+    max-width: min(520px, 90vw);
+    line-height: 1.5;
+  }
+
+  /* ── STUDY NOTE + RETRY ── */
+  .study-note {
+    margin-top: clamp(12px, 1.5vw, 18px);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  .study-note.show { max-height: 400px; opacity: 1; }
+  .study-note-inner {
+    background: #1a1533;
+    border: 1.5px solid #5b4fcf;
+    border-radius: 10px;
+    padding: clamp(12px, 1.5vw, 18px) clamp(14px, 1.8vw, 20px) clamp(10px, 1.2vw, 16px);
+  }
+  .study-note-text {
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 600;
+    color: #c4b5fd;
+    line-height: 1.65;
+    margin-bottom: clamp(10px, 1.2vw, 14px);
+  }
+  .study-note-text strong { color: #e0d7ff; font-weight: 800; }
+  .study-note-text em { color: #a5f3fc; font-style: normal; font-weight: 700; }
+  .retry-btn {
+    background: #5b4fcf;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 800;
+    padding: clamp(7px, 0.9vw, 10px) clamp(14px, 1.8vw, 20px);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .retry-btn:hover { background: #7c6fdf; transform: translateY(-1px); }
+  .q-card.retry-highlight {
+    border-color: #5b4fcf;
+    box-shadow: 0 0 0 3px rgba(91,79,207,0.25);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  /* ── TIP CARD ── */
+  .tip-card {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(10px, 1.2vw, 16px);
+    background: #141b2e;
+    border: 1.5px solid #2a3a5c;
+    border-left: 4px solid var(--accent2);
+    border-radius: 12px;
+    padding: clamp(12px, 1.5vw, 18px) clamp(14px, 1.8vw, 20px);
+    margin-bottom: clamp(8px, 1vw, 14px);
+  }
+  .tip-icon { font-size: clamp(18px, 2vw, 24px); flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: clamp(12px, 1.2vw, 14px); color: #94a3b8; line-height: 1.65; font-weight: 600; }
+  .tip-text strong { color: #c7d2fe; }
+  .tip-text em { color: #e2e8f0; font-style: normal; }
+
+  /* ── SECTION COLOR THEMES ── */
+  .sec-a .section-icon { background: rgba(110,231,183,0.15); }
+  .sec-b .section-icon { background: rgba(129,140,248,0.15); }
+  .sec-c .section-icon { background: rgba(251,146,60,0.15); }
+  .sec-d .section-icon { background: rgba(248,113,113,0.15); }
+  .sec-e .section-icon { background: rgba(52,211,153,0.15); }
+  .sec-a .section-pill { background: rgba(110,231,183,0.15); color: var(--accent); }
+  .sec-b .section-pill { background: rgba(129,140,248,0.15); color: var(--accent2); }
+  .sec-c .section-pill { background: rgba(251,146,60,0.15); color: var(--accent3); }
+  .sec-d .section-pill { background: rgba(248,113,113,0.15); color: var(--wrong); }
+  .sec-e .section-pill { background: rgba(52,211,153,0.15); color: #34d399; }
+
+  /* ── MOBILE REFINEMENTS (under 480px) ── */
+  @media (max-width: 480px) {
+    .section-pill { display: none; }
+    .option-btn { font-size: 13px; padding: 10px 12px; }
+    #score-section .breakdown { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── LAPTOP / DESKTOP ENHANCEMENTS (over 1024px) ── */
+  @media (min-width: 1024px) {
+    #view-test { font-size: 16px; }
+    main { padding-left: 0; padding-right: 0; }
+    .q-card { padding: 28px 32px 24px; }
+    .q-text { font-size: 17px; }
+    .option-btn { font-size: 15px; padding: 13px 18px; }
+    .feedback { font-size: 14px; padding: 13px 18px; }
+    /* Side-by-side layout for options on wide screens */
+    .options.grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    #score-section .breakdown { grid-template-columns: repeat(5, 1fr); }
+    .study-note.show { max-height: 300px; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HUB VIEW ════════════════ -->
+<div id="view-hub">
+<header>
+  <div class="brand">
+    <div class="brand-logo">📚</div>
+    <div class="brand-text">
+      <h1>Study Buddy</h1>
+      <p>Your personal study hub</p>
+    </div>
+  </div>
+  <div class="year-tabs" id="yearTabs"></div>
+</header>
+
+<main>
+  <div id="contentArea"></div>
+</main>
+
+<!-- Add Set Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2>Add a Study Set</h2>
+    <p>Choose the subject, year, and term to unlock. You can add the study materials later.</p>
+
+    <div class="modal-section-label">Subject</div>
+    <div class="modal-grid" id="subjectPicker" style="margin-bottom:18px;"></div>
+
+    <div class="modal-section-label">Year</div>
+    <div class="modal-grid" id="yearPicker" style="margin-bottom:18px;"></div>
+
+    <div class="modal-section-label">Semester & Term</div>
+    <div class="modal-grid" id="termPicker" style="margin-bottom:24px;"></div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" id="confirmAdd" onclick="confirmAddSet()" disabled>Add Study Set</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ TEST VIEW ════════════════ -->
+<div id="view-test">
+  <nav class="sb-nav">
+    <button class="sb-back" onclick="goHome()">← Study Buddy</button>
+    <span class="sb-breadcrumb" id="test-breadcrumb">Year 7 · Sem 1 Term 1 · Science</span>
+  </nav>
+<header>
+  <div class="header-label">Practice Test · Year 7 · S1 T1</div>
+  <h1>Science <span>Study Check</span></h1>
+  <div class="subtitle">Particle Theory · Mixtures · Separation · Data Skills</div>
+  <div class="mode-toggle">
+    <button id="btn-study" class="mode-btn mode-active" onclick="setMode('study')">📖 Study Mode</button>
+    <button id="btn-test" class="mode-btn" onclick="setMode('test')">🎯 Test Mode</button>
+  </div>
+  <div id="mode-hint" class="mode-hint">📖 <strong>Study Mode</strong> — each answer reveals instantly whether you got it right, with an explanation. Great for working through the material.</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0 of 0 answered</div>
+</header>
+
+<main id="main">
+
+  <div class="tip-card">
+    <div class="tip-icon">💡</div>
+    <div class="tip-text">
+      <strong>Recommended approach:</strong> Start in <em>🎯 Test Mode</em> to get an honest score with no peeking — then switch to <em>📖 Study Mode</em> and work through any questions you got wrong. Study notes and a retry button will appear on every wrong answer after you submit.
+    </div>
+  </div>
+
+  <!-- SECTION A -->
+  <div class="section-header sec-a">
+    <div class="section-icon">🧪</div>
+    <div class="section-title">Types of Substances</div>
+    <div class="section-pill">SECTION A</div>
+  </div>
+
+  <div class="q-card" data-q="1">
+    <div class="q-num">Q1 · Multiple Choice</div>
+    <div class="q-text">Which of the following best describes the features of a <em>pure substance</em>?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Made of two or more different types of particles mixed together, with properties that vary throughout</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">B</span> Contains only one type of particle (atoms or molecules), has a fixed composition, and has consistent properties throughout</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">C</span> A substance that looks clear or colourless, such as water or glass</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Any solid that has not been dissolved in a liquid</button>
+    </div>
+    <div class="feedback" data-explanation="A pure substance has only ONE type of particle — it's either a single element or a single compound. This means its composition is fixed everywhere and its properties (like melting point and boiling point) are always the same. Keep this definition in mind for the next question!"></div>
+  </div>
+
+  <div class="q-card" data-q="2">
+    <div class="q-num">Q2 · Multiple Choice</div>
+    <div class="q-text">Using those features — which of the following is a <em>pure substance</em>?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Saltwater</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> Air</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> Distilled water (H₂O)</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Sand mixed with iron filings</button>
+    </div>
+    <div class="feedback" data-explanation="Distilled water is a single compound — only one type of molecule (H₂O) throughout. Saltwater, air, and the sand mixture all contain more than one type of particle, making them mixtures."></div>
+  </div>
+
+  <div class="q-card" data-q="3">
+    <div class="q-num">Q3 · Multiple Choice</div>
+    <div class="q-text">What is the key difference between an <em>element</em> and a <em>compound</em>?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Elements can be separated by filtration; compounds cannot</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">B</span> An element contains only one type of atom; a compound contains two or more types chemically joined</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">C</span> Compounds are always gases; elements are always solids</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> There is no difference — they are the same thing</button>
+    </div>
+    <div class="feedback" data-explanation="Elements are made of one type of atom (e.g. oxygen O₂). Compounds have two or more different atoms chemically bonded together (e.g. water H₂O)."></div>
+  </div>
+
+  <div class="q-card" data-q="4">
+    <div class="q-num">Q4 · Multiple Choice</div>
+    <div class="q-text">Which of the following is the best example of a <em>mixture</em>?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Pure gold (Au)</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> Carbon dioxide (CO₂)</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> Saltwater</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Hydrogen gas (H₂)</button>
+    </div>
+    <div class="feedback" data-explanation="Saltwater is a mixture of salt (solute) and water (solvent). Pure gold and hydrogen gas are elements; CO₂ is a compound."></div>
+  </div>
+
+  <!-- SECTION B -->
+  <div class="section-header sec-b">
+    <div class="section-icon">⚛️</div>
+    <div class="section-title">Particle Model of Matter</div>
+    <div class="section-pill">SECTION B</div>
+  </div>
+
+  <div class="q-card" data-q="5">
+    <div class="q-num">Q5 · Multiple Choice</div>
+    <div class="q-text">According to the particle model, which statement is <em>always</em> true?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Particles in a solid are not moving at all</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">B</span> All particles are always moving</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">C</span> Particles in a gas are attracted to each other strongly</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Particles are only found in liquids and gases</button>
+    </div>
+    <div class="feedback" data-explanation="A key rule of the particle model is that particles are ALWAYS moving — even in solids (they vibrate in place). Solid particles are still attracted to each other, just in fixed positions."></div>
+  </div>
+
+  <div class="q-card" data-q="6">
+    <div class="q-num">Q6 · Multiple Choice</div>
+    <div class="q-text">How does the arrangement of particles differ between a <em>solid</em> and a <em>gas</em>?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Solids have particles spread far apart; gas particles are tightly packed</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> Both solids and gases have the same particle arrangement</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> Solids have tightly packed, ordered particles; gas particles are spread far apart and move freely</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Gas particles are arranged in rows; solids have random particle arrangement</button>
+    </div>
+    <div class="feedback" data-explanation="In solids, particles are packed closely in a regular arrangement and vibrate. In gases, particles are far apart, move quickly and freely, and have very little attraction between them."></div>
+  </div>
+
+  <div class="q-card" data-q="7">
+    <div class="q-num">Q7 · Multiple Choice</div>
+    <div class="q-text">When a solid is heated until it melts into a liquid, what happens to its particles?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> The particles disappear and new ones form</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> The particles slow down and pack more tightly</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> The particles gain energy, move faster, and break free from their fixed positions</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> The particles change into a different type of particle</button>
+    </div>
+    <div class="feedback" data-explanation="Heating gives particles more energy. They vibrate faster until the attractions between them can no longer hold them in fixed positions — they become a liquid."></div>
+  </div>
+
+  <!-- SECTION C -->
+  <div class="section-header sec-c">
+    <div class="section-icon">🔬</div>
+    <div class="section-title">Types of Mixtures</div>
+    <div class="section-pill">SECTION C</div>
+  </div>
+
+  <div class="q-card" data-q="8">
+    <div class="q-num">Q8 · Multiple Choice</div>
+    <div class="q-text">Which mixture is <em>homogeneous</em>?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Sand and water</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">B</span> Saltwater</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">C</span> Sand and iron filings</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Oil and water</button>
+    </div>
+    <div class="feedback" data-explanation="Saltwater is homogeneous — it has a uniform composition throughout; you can't see separate parts. Sand/water, oil/water, and sand/iron filings are heterogeneous — you can see distinct components."></div>
+  </div>
+
+  <div class="q-card" data-q="9">
+    <div class="q-num">Q9 · Multiple Choice</div>
+    <div class="q-text">A heterogeneous mixture is best described as one that…</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> …looks the same throughout and cannot be separated</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> …is always made of exactly two substances</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> …has a non-uniform composition — different parts look or feel different</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> …can only exist as a solid</button>
+    </div>
+    <div class="feedback" data-explanation="Heterogeneous means the mixture is not uniform — you can see or detect different components in different parts (e.g. trail mix, sand + water)."></div>
+  </div>
+
+  <!-- SECTION D -->
+  <div class="section-header sec-d">
+    <div class="section-icon">⚗️</div>
+    <div class="section-title">Separation Techniques</div>
+    <div class="section-pill">SECTION D</div>
+  </div>
+
+  <div class="q-card" data-q="10">
+    <div class="q-num">Q10 · Multiple Choice</div>
+    <div class="q-text">Which technique would be <em>most suitable</em> to separate sand from water?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Evaporation</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">B</span> Filtration</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">C</span> Distillation</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Magnetism</button>
+    </div>
+    <div class="feedback" data-explanation="Filtration works because sand particles are too large to pass through filter paper, while water molecules are small enough to pass through."></div>
+  </div>
+
+  <div class="q-card" data-q="11">
+    <div class="q-num">Q11 · Multiple Choice</div>
+    <div class="q-text">A student wants to recover dissolved salt from saltwater. What is the <em>best</em> technique?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Filtration — the salt will collect on the filter paper</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> Magnetism — salt is magnetic</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> Evaporation — heat the saltwater until the water evaporates, leaving salt crystals</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Sieving — the salt is too small to pass through a sieve</button>
+    </div>
+    <div class="feedback" data-explanation="Salt is dissolved (particles are too small for filtration or sieving). Evaporation removes the water by turning it to gas, leaving the salt behind. Salt is not magnetic."></div>
+  </div>
+
+  <div class="q-card" data-q="12">
+    <div class="q-num">Q12 · Multiple Choice</div>
+    <div class="q-text">Iron filings have been mixed with sand. Which property of iron makes it easy to separate them?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Iron dissolves in water; sand does not</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> Iron has a lower boiling point than sand</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> Iron is magnetic; sand is not</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Iron particles are larger than sand particles</button>
+    </div>
+    <div class="feedback" data-explanation="A magnet can attract and pull out the iron filings while the sand is left behind. This works because of iron's magnetic property."></div>
+  </div>
+
+  <div class="q-card" data-q="13">
+    <div class="q-num">Q13 · Multiple Choice</div>
+    <div class="q-text">Distillation is used to separate two liquids with <em>different</em>…</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> …colours</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> …particle sizes</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> …boiling points</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> …magnetic properties</button>
+    </div>
+    <div class="feedback" data-explanation="In distillation, the liquid with the lower boiling point evaporates first, is collected as a gas, then cooled and condensed back to a liquid — separating it from the other liquid."></div>
+  </div>
+
+  <div class="q-card" data-q="14">
+    <div class="q-num">Q14 · Multiple Choice</div>
+    <div class="q-text">Sieving is best used when the components of a mixture differ in their…</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> …solubility</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> …boiling point</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> …particle size</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> …magnetism</button>
+    </div>
+    <div class="feedback" data-explanation="A sieve has holes of a specific size. Larger particles are trapped while smaller particles pass through — so it relies on differences in particle size (e.g. separating gravel from sand)."></div>
+  </div>
+
+  <!-- SECTION E -->
+  <div class="section-header sec-e">
+    <div class="section-icon">📊</div>
+    <div class="section-title">Data Skills</div>
+    <div class="section-pill">SECTION E</div>
+  </div>
+
+  <!-- Q15: Line graph reading -->
+  <div class="q-card" data-q="15">
+    <div class="q-num">Q15 · Graph Reading</div>
+    <div class="q-text">The graph below shows the temperature of water being heated over time. What was the temperature at <strong>4 minutes</strong>?</div>
+    <!-- Inline SVG: line graph, temperature vs time -->
+    <div style="background:#12152a;border-radius:10px;padding:16px;margin-bottom:14px;overflow-x:auto;">
+      <svg viewBox="0 0 380 220" width="100%" style="max-width:380px;display:block;margin:0 auto;font-family:'Space Mono',monospace;">
+        <!-- Grid lines -->
+        <line x1="55" y1="20" x2="55" y2="180" stroke="#2d3248" stroke-width="1"/>
+        <line x1="55" y1="180" x2="355" y2="180" stroke="#2d3248" stroke-width="1"/>
+        <!-- Horizontal gridlines -->
+        <line x1="55" y1="180" x2="355" y2="180" stroke="#2d3248" stroke-width="0.5"/>
+        <line x1="55" y1="148" x2="355" y2="148" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="116" x2="355" y2="116" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="84" x2="355" y2="84" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="52" x2="355" y2="52" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="20" x2="355" y2="20" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <!-- Vertical gridlines -->
+        <line x1="115" y1="20" x2="115" y2="180" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="175" y1="20" x2="175" y2="180" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="235" y1="20" x2="235" y2="180" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="295" y1="20" x2="295" y2="180" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="355" y1="20" x2="355" y2="180" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <!-- Y axis labels (0,20,40,60,80,100) -->
+        <text x="48" y="184" fill="#64748b" font-size="9" text-anchor="end">0</text>
+        <text x="48" y="152" fill="#64748b" font-size="9" text-anchor="end">20</text>
+        <text x="48" y="120" fill="#64748b" font-size="9" text-anchor="end">40</text>
+        <text x="48" y="88" fill="#64748b" font-size="9" text-anchor="end">60</text>
+        <text x="48" y="56" fill="#64748b" font-size="9" text-anchor="end">80</text>
+        <text x="48" y="24" fill="#64748b" font-size="9" text-anchor="end">100</text>
+        <!-- X axis labels (0,2,4,6,8,10 min) -->
+        <text x="55" y="195" fill="#64748b" font-size="9" text-anchor="middle">0</text>
+        <text x="115" y="195" fill="#64748b" font-size="9" text-anchor="middle">2</text>
+        <text x="175" y="195" fill="#64748b" font-size="9" text-anchor="middle">4</text>
+        <text x="235" y="195" fill="#64748b" font-size="9" text-anchor="middle">6</text>
+        <text x="295" y="195" fill="#64748b" font-size="9" text-anchor="middle">8</text>
+        <text x="355" y="195" fill="#64748b" font-size="9" text-anchor="middle">10</text>
+        <!-- Axis titles -->
+        <text x="205" y="213" fill="#94a3b8" font-size="9" text-anchor="middle">Time (minutes)</text>
+        <text x="12" y="100" fill="#94a3b8" font-size="9" text-anchor="middle" transform="rotate(-90,12,100)">Temperature (°C)</text>
+        <!-- Graph title -->
+        <text x="205" y="13" fill="#e2e8f0" font-size="10" text-anchor="middle" font-weight="bold">Temperature of Water When Heated</text>
+        <!-- Data line: (0,20°)→(2,40°)→(4,60°)→(6,80°)→(8,100°)→(10,100°) -->
+        <!-- y pos = 180 - (temp/100)*160 -->
+        <!-- 20°C → y=148, 40°C → y=116, 60°C → y=84, 80°C → y=52, 100°C → y=20 -->
+        <polyline points="55,148 115,116 175,84 235,52 295,20 355,20" fill="none" stroke="#6ee7b7" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- Data points -->
+        <circle cx="55" cy="148" r="4" fill="#6ee7b7"/>
+        <circle cx="115" cy="116" r="4" fill="#6ee7b7"/>
+        <circle cx="175" cy="84" r="4" fill="#6ee7b7"/>
+        <circle cx="235" cy="52" r="4" fill="#6ee7b7"/>
+        <circle cx="295" cy="20" r="4" fill="#6ee7b7"/>
+        <circle cx="355" cy="20" r="4" fill="#6ee7b7"/>
+        <!-- Highlight 4 min point -->
+        <line x1="175" y1="84" x2="175" y2="180" stroke="#fb923c" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="55" y1="84" x2="175" y2="84" stroke="#fb923c" stroke-width="1" stroke-dasharray="4,3"/>
+      </svg>
+    </div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> 40°C</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">B</span> 60°C</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">C</span> 80°C</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> 100°C</button>
+    </div>
+    <div class="feedback" data-explanation="Follow the orange dashed lines — at 4 minutes on the x-axis, the line sits at 60°C on the y-axis. The water is still rising toward boiling point at this stage."></div>
+  </div>
+
+  <!-- Q16: Missing graph elements -->
+  <div class="q-card" data-q="16">
+    <div class="q-num">Q16 · Graph Reading</div>
+    <div class="q-text">Look at the graph below carefully. What is <em>missing</em> that makes this graph incomplete?</div>
+    <!-- Incomplete graph: no title, no y-axis label, no units -->
+    <div style="background:#12152a;border-radius:10px;padding:16px;margin-bottom:14px;overflow-x:auto;">
+      <svg viewBox="0 0 380 210" width="100%" style="max-width:380px;display:block;margin:0 auto;font-family:'Space Mono',monospace;">
+        <!-- No title -->
+        <!-- Grid -->
+        <line x1="55" y1="20" x2="55" y2="170" stroke="#2d3248" stroke-width="1"/>
+        <line x1="55" y1="170" x2="340" y2="170" stroke="#2d3248" stroke-width="1"/>
+        <line x1="55" y1="138" x2="340" y2="138" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="106" x2="340" y2="106" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="74" x2="340" y2="74" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="42" x2="340" y2="42" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <!-- Y axis numbers only — NO label -->
+        <text x="48" y="174" fill="#64748b" font-size="9" text-anchor="end">0</text>
+        <text x="48" y="142" fill="#64748b" font-size="9" text-anchor="end">5</text>
+        <text x="48" y="110" fill="#64748b" font-size="9" text-anchor="end">10</text>
+        <text x="48" y="78" fill="#64748b" font-size="9" text-anchor="end">15</text>
+        <text x="48" y="46" fill="#64748b" font-size="9" text-anchor="end">20</text>
+        <!-- X axis categories — labelled but no units indicator / axis title -->
+        <text x="100" y="185" fill="#64748b" font-size="9" text-anchor="middle">Cola</text>
+        <text x="160" y="185" fill="#64748b" font-size="9" text-anchor="middle">Lemonade</text>
+        <text x="220" y="185" fill="#64748b" font-size="9" text-anchor="middle">Juice</text>
+        <text x="280" y="185" fill="#64748b" font-size="9" text-anchor="middle">Water</text>
+        <!-- X axis label: "Drink Type" — present -->
+        <text x="197" y="200" fill="#94a3b8" font-size="9" text-anchor="middle">Drink Type</text>
+        <!-- Bars -->
+        <rect x="76" y="74" width="48" height="96" fill="#818cf8" rx="3"/>
+        <rect x="136" y="106" width="48" height="64" fill="#818cf8" rx="3"/>
+        <rect x="196" y="42" width="48" height="128" fill="#818cf8" rx="3"/>
+        <rect x="256" y="138" width="48" height="32" fill="#818cf8" rx="3"/>
+        <!-- Missing: title AND y-axis label -->
+      </svg>
+    </div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> The bars need to be a different colour</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> There are too many categories on the x-axis</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> The graph is missing a title and a label on the y-axis (we don't know what the numbers represent)</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> The graph should be a line graph, not a column graph</button>
+    </div>
+    <div class="feedback" data-explanation="Every graph needs: (1) a title, (2) labelled axes with units. Here there is no title and the y-axis has numbers but no label — we have no idea if those numbers represent students, litres, dollars, or something else entirely!"></div>
+  </div>
+
+  <!-- Q17: Continuous vs discrete -->
+  <div class="q-card" data-q="17">
+    <div class="q-num">Q17 · Multiple Choice</div>
+    <div class="q-text">A student measures how temperature changes over time when heating water. What type of graph should they use to display this data?</div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Pie chart — to show the proportion of time spent at each temperature</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> Column graph — because temperature is a category</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> Line graph — because both temperature and time are continuous numerical variables</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Either a line or column graph — they show exactly the same information</button>
+    </div>
+    <div class="feedback" data-explanation="Temperature over time is continuous data — both variables change gradually without gaps. Line graphs are always used for continuous data. Column graphs are for discrete (separate, named categories) data like &quot;types of drink&quot;."></div>
+  </div>
+
+  <!-- Q18: Pie chart reading -->
+  <div class="q-card" data-q="18">
+    <div class="q-num">Q18 · Graph Reading</div>
+    <div class="q-text">The pie chart below shows what fraction of a class preferred each type of soft drink. Approximately what <strong>percentage</strong> of students preferred juice?</div>
+    <div style="background:#12152a;border-radius:10px;padding:16px;margin-bottom:14px;overflow-x:auto;">
+      <svg viewBox="0 0 360 200" width="100%" style="max-width:360px;display:block;margin:0 auto;font-family:'Space Mono',monospace;">
+        <text x="180" y="14" fill="#e2e8f0" font-size="10" text-anchor="middle" font-weight="bold">Favourite Soft Drinks in Class 7B</text>
+        <!-- Pie chart centred at 110,110 radius 80 -->
+        <!-- Slices: Cola 30% (108°), Juice 25% (90°), Lemonade 20% (72°), Water 15% (54°), Other 10% (36°) -->
+        <!-- Arc math: start at top (−90°), go clockwise -->
+        <!-- Cola: 0° to 108°  (−90 to 18°) -->
+        <!-- SVG arc: Cola starts at angle -90deg, sweeps 108deg -->
+        <!-- x = 110 + 80*cos(angle), y = 110 + 80*sin(angle) -->
+        <!-- Cola: start(-90deg)=(110,30), end(18deg)=(110+80*cos18, 110+80*sin18)=(186.1,134.7) -->
+        <path d="M110,110 L110,30 A80,80 0 0,1 186,135 Z" fill="#818cf8"/>
+        <!-- Juice: 108° to 198° (18° to 108°) -->
+        <!-- end: (110+80*cos108, 110+80*sin108)=(85.3,186.1) -->
+        <path d="M110,110 L186,135 A80,80 0 0,1 85,186 Z" fill="#6ee7b7"/>
+        <!-- Lemonade: 198° to 270° (108° to 180°) -->
+        <!-- end: (110+80*cos180, 110+80*sin180)=(30,110) -->
+        <path d="M110,110 L85,186 A80,80 0 0,1 30,110 Z" fill="#fb923c"/>
+        <!-- Water: 270° to 324° (180° to 234°) -->
+        <!-- end: (110+80*cos234, 110+80*sin234)=(63,45.3) -->
+        <path d="M110,110 L30,110 A80,80 0 0,1 63,45 Z" fill="#f87171"/>
+        <!-- Other: 324° to 360° (234° to 270°) -->
+        <!-- end: (110,30) back to top -->
+        <path d="M110,110 L63,45 A80,80 0 0,1 110,30 Z" fill="#94a3b8"/>
+        <!-- Labels/legend -->
+        <rect x="210" y="30" width="10" height="10" fill="#818cf8" rx="2"/>
+        <text x="225" y="40" fill="#e2e8f0" font-size="9">Cola (30%)</text>
+        <rect x="210" y="50" width="10" height="10" fill="#6ee7b7" rx="2"/>
+        <text x="225" y="60" fill="#e2e8f0" font-size="9">Juice (?%)</text>
+        <rect x="210" y="70" width="10" height="10" fill="#fb923c" rx="2"/>
+        <text x="225" y="80" fill="#e2e8f0" font-size="9">Lemonade (20%)</text>
+        <rect x="210" y="90" width="10" height="10" fill="#f87171" rx="2"/>
+        <text x="225" y="100" fill="#e2e8f0" font-size="9">Water (15%)</text>
+        <rect x="210" y="110" width="10" height="10" fill="#94a3b8" rx="2"/>
+        <text x="225" y="120" fill="#e2e8f0" font-size="9">Other (10%)</text>
+        <text x="180" y="185" fill="#64748b" font-size="8" text-anchor="middle">All percentages must add to 100%</text>
+      </svg>
+    </div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> 10%</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> 20%</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> 25%</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> 30%</button>
+    </div>
+    <div class="feedback" data-explanation="All slices must add to 100%. Cola (30%) + Lemonade (20%) + Water (15%) + Other (10%) = 75%. So Juice = 100% − 75% = 25%. This is how you read a pie chart — if one slice label is missing, work out what's left over."></div>
+  </div>
+
+  <!-- Q19: Graph improvement -->
+  <div class="q-card" data-q="19">
+    <div class="q-num">Q19 · Graph Reading</div>
+    <div class="q-text">The graph below shows results from a heating experiment. The student only took <strong>3 readings</strong>. What would be the best suggestion to improve this investigation?</div>
+    <!-- Sparse line graph with only 3 data points -->
+    <div style="background:#12152a;border-radius:10px;padding:16px;margin-bottom:14px;overflow-x:auto;">
+      <svg viewBox="0 0 380 220" width="100%" style="max-width:380px;display:block;margin:0 auto;font-family:'Space Mono',monospace;">
+        <line x1="55" y1="20" x2="55" y2="180" stroke="#2d3248" stroke-width="1"/>
+        <line x1="55" y1="180" x2="355" y2="180" stroke="#2d3248" stroke-width="1"/>
+        <line x1="55" y1="148" x2="355" y2="148" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="116" x2="355" y2="116" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="84" x2="355" y2="84" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="52" x2="355" y2="52" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="55" y1="20" x2="355" y2="20" stroke="#2d3248" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <!-- Y labels -->
+        <text x="48" y="184" fill="#64748b" font-size="9" text-anchor="end">0</text>
+        <text x="48" y="152" fill="#64748b" font-size="9" text-anchor="end">20</text>
+        <text x="48" y="120" fill="#64748b" font-size="9" text-anchor="end">40</text>
+        <text x="48" y="88" fill="#64748b" font-size="9" text-anchor="end">60</text>
+        <text x="48" y="56" fill="#64748b" font-size="9" text-anchor="end">80</text>
+        <text x="48" y="24" fill="#64748b" font-size="9" text-anchor="end">100</text>
+        <!-- X labels (0, 5, 10 min only — sparse) -->
+        <text x="55" y="195" fill="#64748b" font-size="9" text-anchor="middle">0</text>
+        <text x="205" y="195" fill="#64748b" font-size="9" text-anchor="middle">5</text>
+        <text x="355" y="195" fill="#64748b" font-size="9" text-anchor="middle">10</text>
+        <!-- Axis titles -->
+        <text x="205" y="213" fill="#94a3b8" font-size="9" text-anchor="middle">Time (minutes)</text>
+        <text x="12" y="100" fill="#94a3b8" font-size="9" text-anchor="middle" transform="rotate(-90,12,100)">Temperature (°C)</text>
+        <text x="205" y="13" fill="#e2e8f0" font-size="10" text-anchor="middle" font-weight="bold">Heating of Water Over Time</text>
+        <!-- Only 3 data points: 0min=20°, 5min=60°, 10min=100° -->
+        <polyline points="55,148 205,84 355,20" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-dasharray="6,3"/>
+        <circle cx="55" cy="148" r="5" fill="#818cf8"/>
+        <circle cx="205" cy="84" r="5" fill="#818cf8"/>
+        <circle cx="355" cy="20" r="5" fill="#818cf8"/>
+        <!-- Ghost suggestion of more points -->
+        <circle cx="115" cy="131" r="3" fill="none" stroke="#f87171" stroke-width="1.5" stroke-dasharray="2,2" opacity="0.6"/>
+        <circle cx="175" cy="110" r="3" fill="none" stroke="#f87171" stroke-width="1.5" stroke-dasharray="2,2" opacity="0.6"/>
+        <circle cx="265" cy="52" r="3" fill="none" stroke="#f87171" stroke-width="1.5" stroke-dasharray="2,2" opacity="0.6"/>
+        <text x="280" y="48" fill="#f87171" font-size="8" opacity="0.7">← more needed?</text>
+      </svg>
+    </div>
+    <div class="options">
+      <button class="option-btn" data-correct="false"><span class="opt-letter">A</span> Use a pie chart instead to better show the temperature changes</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">B</span> Change the title of the graph</button>
+      <button class="option-btn" data-correct="true"><span class="opt-letter">C</span> Take readings more frequently (e.g. every 1–2 minutes) and repeat the experiment to check for consistent results</button>
+      <button class="option-btn" data-correct="false"><span class="opt-letter">D</span> Remove the axis labels to make the graph simpler</button>
+    </div>
+    <div class="feedback" data-explanation="With only 3 data points, the line between them is guesswork. Taking readings more frequently gives more detail and reveals the true shape of the trend. Repeating the experiment checks if the results are reliable (consistent across trials)."></div>
+  </div>
+
+  <!-- SHORT ANSWER -->
+  <div class="section-header" style="margin-top:36px;">
+    <div class="section-icon" style="background:rgba(251,146,60,0.15)">✍️</div>
+    <div class="section-title">Short Answer Questions</div>
+    <div class="section-pill" style="background:rgba(251,146,60,0.15);color:var(--accent3)">SECTION F</div>
+  </div>
+
+  <div class="q-card" data-q="20">
+    <div class="q-num">Q20 · Short Answer</div>
+    <div class="q-text">Name <strong>three</strong> properties of particles described in the particle model of matter.</div>
+    <div class="short-answer-wrap">
+      <textarea rows="3" placeholder="Type your answer here…"></textarea>
+      <button class="check-btn" onclick="revealShort(this)">Reveal Answer</button>
+    </div>
+    <div class="feedback wrong-fb">
+      <strong>Model Answer:</strong> Any three of: (1) All matter is made of particles. (2) Particles are always moving. (3) Particles are attracted to each other. (4) The arrangement and movement of particles changes depending on the state of matter (solid, liquid, gas).
+    </div>
+  </div>
+
+  <div class="q-card" data-q="21">
+    <div class="q-num">Q21 · Short Answer</div>
+    <div class="q-text">A mixture of sand, iron filings, and salt is dissolved in water. Describe the steps you would take to separate <em>all three</em> components. State which technique you use at each step and why.</div>
+    <div class="short-answer-wrap">
+      <textarea rows="5" placeholder="Type your answer here…"></textarea>
+      <button class="check-btn" onclick="revealShort(this)">Reveal Answer</button>
+    </div>
+    <div class="feedback wrong-fb">
+      <strong>Model Answer:</strong><br>
+      Step 1 — <em>Magnetism</em>: Use a magnet to remove the iron filings, because iron is magnetic and sand/salt are not.<br>
+      Step 2 — <em>Filtration</em>: Pour the remaining sand + saltwater through filter paper. The sand is too large to pass through; the saltwater passes through as the filtrate.<br>
+      Step 3 — <em>Evaporation</em>: Heat the saltwater until the water evaporates (particles gain energy and escape as gas), leaving behind solid salt crystals.
+    </div>
+  </div>
+
+  <div class="q-card" data-q="22">
+    <div class="q-num">Q22 · Short Answer</div>
+    <div class="q-text">Explain what happens at a <em>particle level</em> when a liquid evaporates.</div>
+    <div class="short-answer-wrap">
+      <textarea rows="3" placeholder="Type your answer here…"></textarea>
+      <button class="check-btn" onclick="revealShort(this)">Reveal Answer</button>
+    </div>
+    <div class="feedback wrong-fb">
+      <strong>Model Answer:</strong> When a liquid is heated, particles near the surface gain enough energy to overcome the attractions holding them in the liquid. These high-energy particles escape from the surface and become gas particles, spreading out into the air. As more particles escape, the liquid slowly disappears.
+    </div>
+  </div>
+
+  <button id="submit-btn" onclick="submitTest()">Submit & See My Score →</button>
+
+  <div id="score-section">
+    <h2>Test Complete! 🎉</h2>
+    <div class="big-score" id="scoreDisplay">—</div>
+    <div class="score-sub" id="scoreSubtext"></div>
+    <div class="breakdown" id="breakdown"></div>
+    <div id="scoreMessage" style="font-size:15px;color:#94a3b8;margin-bottom:20px;"></div>
+    <button id="reset-btn" onclick="resetTest()">Try Again</button>
+  </div>
+
+</main>
+</div>
+
+<script>
+/* ── HUB JS ── */
+
+// ─────────────────────────────────────────────
+//  DATA MODEL
+// ─────────────────────────────────────────────
+
+const SUBJECTS = [
+  { id: 'science',   label: 'Science',        emoji: '🧪', color: '#6ee7b7' },
+  { id: 'maths',     label: 'Maths',          emoji: '📐', color: '#818cf8' },
+  { id: 'english',   label: 'English',        emoji: '📖', color: '#fb923c' },
+  { id: 'history',   label: 'History',        emoji: '🏛️', color: '#f472b6' },
+  { id: 'geography', label: 'Geography',      emoji: '🌏', color: '#38bdf8' },
+  { id: 'art',       label: 'Art',            emoji: '🎨', color: '#facc15' },
+];
+
+const YEARS = [7, 8, 9, 10];
+
+const TERMS = [
+  { id: 's1t1', label: 'Sem 1 · Term 1', sem: 1 },
+  { id: 's1t2', label: 'Sem 1 · Term 2', sem: 1 },
+  { id: 's2t3', label: 'Sem 2 · Term 3', sem: 2 },
+  { id: 's2t4', label: 'Sem 2 · Term 4', sem: 2 },
+];
+
+// Study sets catalogue — add entries here as files are built
+// file: null means "coming soon / not yet built"
+const CATALOGUE = {
+  'science-7-s1t1': {
+    subject: 'science', year: 7, term: 's1t1',
+    title: 'Particle Theory & Mixtures',
+    topics: 'Pure substances · Particle model · Separation techniques · Data skills',
+    questions: 22,
+    file: 'yr7-s1-t1-science.html',
+  },
+  // Future sets — add here when built:
+  // 'maths-7-s1t1': { subject: 'maths', year: 7, term: 's1t1', title: '...', topics: '...', questions: 0, file: null },
+};
+
+// ─────────────────────────────────────────────
+//  STATE (persisted to localStorage)
+// ─────────────────────────────────────────────
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('studybuddy_v1');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  // Default: Year 7 unlocked, Yr7 Science S1T1 visible
+  return {
+    activeYear: 7,
+    unlockedYears: [7],
+    visibleSets: ['science-7-s1t1'],
+    scores: {},       // setId -> { pct, date }
+  };
+}
+
+function saveState(s) {
+  try { localStorage.setItem('studybuddy_v1', JSON.stringify(s)); } catch(e) {}
+}
+
+let state = loadState();
+
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
+
+function render() {
+  renderYearTabs();
+  renderContent();
+}
+
+function renderYearTabs() {
+  const container = document.getElementById('yearTabs');
+  container.innerHTML = '';
+  YEARS.forEach(yr => {
+    const unlocked = state.unlockedYears.includes(yr);
+    const active = state.activeYear === yr;
+    const btn = document.createElement('button');
+    btn.className = `year-tab${active ? ' active' : ''}${!unlocked ? ' locked' : ''}`;
+    btn.textContent = `Year ${yr}`;
+    if (!unlocked) {
+      const lock = document.createElement('span');
+      lock.className = 'lock-icon';
+      lock.textContent = '🔒';
+      btn.appendChild(lock);
+    }
+    if (unlocked) btn.onclick = () => { state.activeYear = yr; saveState(state); render(); };
+    container.appendChild(btn);
+  });
+}
+
+function renderContent() {
+  const container = document.getElementById('contentArea');
+  const yr = state.activeYear;
+
+  // Get sets for this year, grouped by semester then term
+  const setsForYear = state.visibleSets
+    .filter(id => {
+      const entry = CATALOGUE[id];
+      return entry && entry.year === yr;
+    })
+    .map(id => ({ id, ...CATALOGUE[id] }));
+
+  // Group by term
+  const bySemTerm = {};
+  TERMS.forEach(t => { bySemTerm[t.id] = []; });
+  setsForYear.forEach(s => {
+    if (bySemTerm[s.term]) bySemTerm[s.term].push(s);
+  });
+
+  // Also include pending sets not yet in catalogue but user has unlocked
+  // (future: handled by add flow)
+
+  const sems = [
+    { label: 'Semester 1', terms: ['s1t1', 's1t2'] },
+    { label: 'Semester 2', terms: ['s2t3', 's2t4'] },
+  ];
+
+  let html = '';
+
+  sems.forEach(sem => {
+    let semHasContent = sem.terms.some(tid => bySemTerm[tid].length > 0);
+    if (!semHasContent) return;
+
+    sem.terms.forEach(tid => {
+      const sets = bySemTerm[tid];
+      if (!sets.length) return;
+      const termLabel = TERMS.find(t => t.id === tid).label;
+      html += `<div class="sem-label">${sem.label} · ${termLabel}</div>`;
+      html += `<div class="subject-grid">`;
+      sets.forEach(s => { html += buildCard(s); });
+      html += `</div>`;
+    });
+  });
+
+  if (!html) {
+    html = `<div class="empty-state">
+      <div class="empty-icon">📂</div>
+      <p>No study sets for Year ${yr} yet.<br>Use the button below to add one when you're ready.</p>
+    </div>`;
+  }
+
+  html += `<button class="add-card" onclick="openModal()">＋ Add Study Set</button>`;
+
+  container.innerHTML = html;
+}
+
+function buildCard(s) {
+  const subj = SUBJECTS.find(x => x.id === s.subject) || { color: '#94a3b8', emoji: '📄', label: s.subject };
+  const score = state.scores[s.id];
+  const comingSoon = !s.file;
+
+  const scoreBadge = score
+    ? `<span class="score-badge">✓ ${score.pct}%</span>`
+    : '';
+
+  const btnStyle = `background:${subj.color};color:#0b0d14;`;
+  const btnLabel = score ? 'Retake' : 'Start';
+
+  if (comingSoon) {
+    return `
+      <div class="subject-card coming-soon" style="opacity:0.55;">
+        <div class="card-strip" style="background:${subj.color};opacity:0.4;"></div>
+        <div class="card-body">
+          <div class="card-meta">${subj.emoji} ${subj.label} · Year ${s.year}</div>
+          <div class="card-subject">${s.title || 'Coming Soon'}</div>
+          <div class="card-topic">${s.topics || 'Study materials not yet added'}</div>
+          <div class="card-footer">
+            <div></div>
+            <span class="coming-badge">Coming Soon</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <a href="#" class="subject-card" style="text-decoration:none;" onclick="event.preventDefault();openSet('${s.id}')">
+      <div class="card-strip" style="background:${subj.color};"></div>
+      <div class="card-body">
+        <div class="card-meta">${subj.emoji} ${subj.label} · Year ${s.year} · ${TERMS.find(t=>t.id===s.term).label}</div>
+        <div class="card-subject">${s.title}</div>
+        <div class="card-topic">${s.topics}</div>
+        <div class="card-footer">
+          <div class="card-stats">
+            <div class="stat">
+              <span class="stat-val">${s.questions}</span>
+              <span class="stat-label">Questions</span>
+            </div>
+            ${score ? `<div class="stat">
+              <span class="stat-val" style="color:${subj.color}">${score.pct}%</span>
+              <span class="stat-label">Best score</span>
+            </div>` : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${scoreBadge}
+            <button class="card-btn" style="${btnStyle}" onclick="event.preventDefault();openSet('${s.id}')">${btnLabel} →</button>
+          </div>
+        </div>
+      </div>
+    </a>`;
+}
+
+// ─────────────────────────────────────────────
+//  ADD SET MODAL
+// ─────────────────────────────────────────────
+
+let modalSelections = { subject: null, year: null, term: null };
+
+function openModal() {
+  modalSelections = { subject: null, year: null, term: null };
+  renderSubjectPicker();
+  renderYearPicker();
+  renderTermPicker();
+  updateConfirmBtn();
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('addModal').classList.remove('open');
+}
+
+function renderSubjectPicker() {
+  const el = document.getElementById('subjectPicker');
+  el.innerHTML = SUBJECTS.map(s => `
+    <div class="modal-option${modalSelections.subject===s.id?' selected':''}"
+         onclick="selectModalOpt('subject','${s.id}',this)">
+      <div class="opt-label">Subject</div>
+      <div class="opt-val">${s.emoji} ${s.label}</div>
+    </div>`).join('');
+}
+
+function renderYearPicker() {
+  const el = document.getElementById('yearPicker');
+  el.innerHTML = YEARS.map(y => `
+    <div class="modal-option${modalSelections.year===y?' selected':''}"
+         onclick="selectModalOpt('year',${y},this)">
+      <div class="opt-label">Year level</div>
+      <div class="opt-val">Year ${y}</div>
+    </div>`).join('');
+}
+
+function renderTermPicker() {
+  const el = document.getElementById('termPicker');
+  el.innerHTML = TERMS.map(t => `
+    <div class="modal-option${modalSelections.term===t.id?' selected':''}"
+         onclick="selectModalOpt('term','${t.id}',this)">
+      <div class="opt-label">Period</div>
+      <div class="opt-val">${t.label}</div>
+    </div>`).join('');
+}
+
+function selectModalOpt(field, val, el) {
+  modalSelections[field] = val;
+  // Update selected styling in that picker
+  el.closest('.modal-grid').querySelectorAll('.modal-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  updateConfirmBtn();
+}
+
+function updateConfirmBtn() {
+  const { subject, year, term } = modalSelections;
+  document.getElementById('confirmAdd').disabled = !(subject && year && term);
+}
+
+function confirmAddSet() {
+  const { subject, year, term } = modalSelections;
+  if (!subject || !year || !term) return;
+
+  // Unlock the year if not already
+  if (!state.unlockedYears.includes(year)) {
+    state.unlockedYears.push(year);
+  }
+
+  // Build the set ID
+  const setId = `${subject}-${year}-${term}`;
+
+  // Add to visible sets if not already there
+  if (!state.visibleSets.includes(setId)) {
+    state.visibleSets.push(setId);
+  }
+
+  // Switch to that year view
+  state.activeYear = year;
+  saveState(state);
+  closeModal();
+  render();
+}
+
+// Close modal on overlay click
+document.getElementById('addModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+render();
+
+
+/* ── VIEW ROUTING ── */
+
+// ─────────────────────────────────────────────
+//  VIEW ROUTING
+// ─────────────────────────────────────────────
+function showView(name) {
+  document.getElementById('view-hub').style.display = name === 'hub' ? '' : 'none';
+  document.getElementById('view-test').style.display = name === 'test' ? '' : 'none';
+  if (name === 'hub') window.scrollTo(0,0);
+  if (name === 'test') document.getElementById('view-test').scrollTop = 0;
+}
+
+function openSet(setId) {
+  if (setId === 'science-7-s1t1') {
+    if (typeof resetTest === 'function') resetTest();
+    const entry = CATALOGUE[setId];
+    const subj = SUBJECTS.find(x => x.id === entry.subject);
+    const termLabel = TERMS.find(t => t.id === entry.term).label;
+    document.getElementById('test-breadcrumb').textContent =
+      'Year ' + entry.year + ' · ' + termLabel + ' · ' + subj.label;
+    showView('test');
+  }
+}
+
+function goHome() {
+  showView('hub');
+  render(); // refresh hub cards to show updated scores
+}
+
+function recordScore(pct) {
+  state.scores['science-7-s1t1'] = { pct: pct, date: new Date().toISOString().slice(0,10) };
+  saveState(state);
+}
+
+
+/* ── SCIENCE TEST JS ── */
+
+  const MCQ_TOTAL = 19;
+  let testMode = false; // false = Study Mode (instant feedback), true = Test Mode (feedback after submit)
+
+  function setMode(mode) {
+    testMode = (mode === 'test');
+    document.getElementById('btn-study').classList.toggle('mode-active', !testMode);
+    document.getElementById('btn-test').classList.toggle('mode-active', testMode);
+    document.getElementById('mode-hint').innerHTML = testMode
+      ? '🎯 <strong>Test Mode</strong> — answers lock in but no feedback until you hit Submit. Use this first to find out honestly where you stand.'
+      : '📖 <strong>Study Mode</strong> — each answer reveals instantly whether you got it right, with an explanation. Great for working through the material.';
+  }
+
+  let answered = new Set();
+  let submitted = false;
+
+  // Study notes keyed by data-q number
+  const studyNotes = {
+    1: `<strong>📖 Quick Reminder — Pure Substances</strong><br>A pure substance contains <em>only one type of particle</em> — either a single element (like gold) or a single compound (like water). Its properties are the same throughout. A mixture contains more than one type of substance mixed together, and can be separated by physical means.`,
+    2: `<strong>📖 Quick Reminder — Spotting a Pure Substance</strong><br>Ask yourself: does it contain only ONE type of particle? H₂O (water) is a single compound — every molecule is the same. Saltwater has water AND dissolved salt particles mixed together, air has multiple gases, and sand + iron filings are visibly different solids — all mixtures.`,
+    3: `<strong>📖 Quick Reminder — Elements vs Compounds</strong><br><em>Element</em>: made of only ONE type of atom (e.g. oxygen O₂, gold Au, hydrogen H₂). <em>Compound</em>: made of TWO or more different types of atoms chemically bonded together (e.g. water H₂O has hydrogen and oxygen bonded). Elements and compounds are both pure substances — mixtures are neither.`,
+    4: `<strong>📖 Quick Reminder — What is a Mixture?</strong><br>A mixture contains two or more substances that are NOT chemically joined — they are just mixed together and can be separated. Pure gold (Au) is one element. CO₂ is one compound. H₂ is one element. Saltwater has salt AND water mixed — that's a mixture!`,
+    5: `<strong>📖 Quick Reminder — Particle Model Rules</strong><br>The particle model has four key rules: (1) All matter is made of particles. (2) Particles are <em>always</em> moving — even in solids, they vibrate. (3) Particles are attracted to each other. (4) The arrangement and speed of particles changes with the state of matter.`,
+    6: `<strong>📖 Quick Reminder — Solids vs Gases</strong><br>In a <em>solid</em>: particles are packed tightly together in a regular arrangement — they vibrate but stay in place. In a <em>gas</em>: particles are spread far apart, move very quickly and freely in all directions, and have very weak attraction between them. Liquids are in between.`,
+    7: `<strong>📖 Quick Reminder — Heating Changes State</strong><br>When a solid is heated, its particles gain energy and vibrate faster and faster. Eventually they have enough energy to break free from their fixed positions — the solid melts into a liquid. More heating gives particles enough energy to escape completely as a gas (evaporation/boiling). The particles themselves don't change — just their energy and arrangement.`,
+    8: `<strong>📖 Quick Reminder — Homogeneous Mixtures</strong><br>A <em>homogeneous</em> mixture looks the same throughout — you can't see the separate parts. Saltwater is a perfect example: the salt is dissolved so evenly you can't see it. A <em>heterogeneous</em> mixture has visible different parts (e.g. sand in water, oil floating on water, iron filings in sand).`,
+    9: `<strong>📖 Quick Reminder — Heterogeneous Mixtures</strong><br>Heterogeneous = NOT uniform. Different parts of the mixture look or feel different. You can often see the separate components. Examples: sand + water (sand settles), oil + water (oil floats), trail mix (you can pick out each ingredient). Homogeneous mixtures look completely uniform — like saltwater or air.`,
+    10: `<strong>📖 Quick Reminder — Choosing Filtration</strong><br>Use filtration when one part is a solid and the other is a liquid, AND the solid particles are too big to pass through filter paper. Sand particles are large — they get trapped. Water molecules are tiny — they pass through as the filtrate. Filtration works because of the <em>difference in particle size</em>.`,
+    11: `<strong>📖 Quick Reminder — Evaporation to Recover a Dissolved Solid</strong><br>When a solid like salt is <em>dissolved</em> in water, the particles are too small to filter out. To get the salt back, you heat the solution. The water particles gain energy and escape as gas (evaporate), leaving the salt crystals behind. The property you're using: the water has a much lower boiling point than salt.`,
+    12: `<strong>📖 Quick Reminder — Magnetism Separation</strong><br>Use a magnet when one component is magnetic and the other is not. Iron and steel are magnetic — most other substances (including sand, salt, and water) are not. Simply move a magnet through the mixture and the iron filings will cling to it while everything else stays put.`,
+    13: `<strong>📖 Quick Reminder — Distillation</strong><br>Distillation separates two liquids that are mixed together by using their <em>different boiling points</em>. When the mixture is heated, the liquid with the lower boiling point evaporates first. That vapour is collected, then cooled in a condenser so it turns back into a pure liquid. The other liquid remains behind.`,
+    14: `<strong>📖 Quick Reminder — Sieving</strong><br>Sieving separates mixtures based on <em>particle size</em>. A sieve has holes of a set size — smaller particles fall through, larger particles are trapped. It only works when there is a meaningful size difference between the components (e.g. gravel vs sand, or flour vs rice).`,
+    15: `<strong>📖 Quick Reminder — Reading a Line Graph</strong><br>To read a value from a line graph: (1) Find the value on the x-axis (horizontal). (2) Draw a line straight up until you hit the data line. (3) Draw a line straight across to the y-axis. (4) Read the value where it meets the y-axis. Check the axis labels and units carefully!`,
+    16: `<strong>📖 Quick Reminder — Complete Graph Checklist</strong><br>Every graph needs: ✅ A <em>title</em> (what is the graph about?) ✅ A labelled <em>x-axis</em> with units ✅ A labelled <em>y-axis</em> with units ✅ An appropriate scale. Without a title and axis labels, the reader cannot know what is being measured or what the numbers mean.`,
+    17: `<strong>📖 Quick Reminder — Line vs Column Graph</strong><br>Use a <em>line graph</em> for continuous data — where both variables are numbers that change smoothly (e.g. temperature over time, distance over time). Use a <em>column graph</em> for discrete data — where the x-axis has separate named categories (e.g. types of drink, days of the week, types of animal). A pie chart shows proportions of a whole (e.g. percentages).`,
+    18: `<strong>📖 Quick Reminder — Reading a Pie Chart</strong><br>A pie chart shows how a total (100%) is divided into parts. All slices must add up to exactly 100%. If one label is missing, add up all the other slices and subtract from 100% to find the missing value. E.g. if you know 30% + 20% + 15% + 10% = 75%, then the missing slice = 100% − 75% = 25%.`,
+    19: `<strong>📖 Quick Reminder — Improving Accuracy</strong><br>To improve an experiment's accuracy and reliability: (1) Take <em>more readings</em> at more frequent intervals — this gives a more detailed and accurate trend line. (2) <em>Repeat the experiment</em> multiple times — if results are consistent across repeats, they are reliable. Three repeats and an average is even better!`,
+  };
+
+  document.querySelectorAll('.options').forEach(optGroup => {
+    optGroup.querySelectorAll('.option-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (btn.disabled) return;
+        const card = btn.closest('.q-card');
+        const qNum = card.dataset.q;
+        const correct = btn.dataset.correct === 'true';
+        const feedback = card.querySelector('.feedback');
+        const explanation = feedback.dataset.explanation || '';
+
+        card.querySelectorAll('.option-btn').forEach(b => {
+          b.disabled = true;
+          if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+
+        if (!correct) {
+          btn.classList.add('wrong');
+          feedback.classList.add('wrong-fb');
+          feedback.innerHTML = `<strong>❌ Not quite!</strong> ${explanation}`;
+        } else {
+          feedback.classList.add('correct-fb');
+          feedback.innerHTML = `<strong>✅ Correct!</strong> ${explanation}`;
+        }
+
+        // In test mode, hold feedback until submit
+        if (testMode) {
+          feedback.classList.add('pending-reveal');
+        } else {
+          feedback.classList.add('show');
+        }
+
+        answered.add(qNum);
+        updateProgress();
+      });
+    });
+  });
+
+  function updateProgress() {
+    const total = document.querySelectorAll('[data-q]').length;
+    const pct = (answered.size / total) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `${answered.size} of ${total} answered`;
+  }
+
+  function revealShort(btn) {
+    const card = btn.closest('.q-card');
+    const fb = card.querySelector('.feedback');
+    fb.classList.add('show');
+    btn.disabled = true;
+    btn.textContent = 'Answer Shown';
+    btn.style.opacity = '0.5';
+    answered.add(card.dataset.q);
+    updateProgress();
+  }
+
+  function submitTest() {
+    submitted = true;
+
+    // Score MCQ questions
+    let scored = 0;
+    document.querySelectorAll('[data-q]').forEach(card => {
+      const qNum = parseInt(card.dataset.q);
+      if (qNum > MCQ_TOTAL) return;
+      const wrong = card.querySelector('.option-btn.wrong');
+      if (!wrong && card.querySelector('.option-btn.correct')) scored++;
+    });
+
+    const pct = Math.round((scored / MCQ_TOTAL) * 100);
+    document.getElementById('scoreDisplay').textContent = `${scored}/${MCQ_TOTAL}`;
+    document.getElementById('scoreSubtext').textContent = `MCQ Score · ${pct}%`;
+
+    // Section breakdown
+    const sections = [
+      { name: 'Types of Substances', qs: [1,2,3,4] },
+      { name: 'Particle Model', qs: [5,6,7] },
+      { name: 'Mixtures', qs: [8,9] },
+      { name: 'Separation', qs: [10,11,12,13,14] },
+      { name: 'Data Skills', qs: [15,16,17,18,19] }
+    ];
+
+    let bdHTML = '';
+    sections.forEach(sec => {
+      let secRight = 0;
+      sec.qs.forEach(qn => {
+        const card = document.querySelector(`[data-q="${qn}"]`);
+        if (!card) return;
+        const wrong = card.querySelector('.option-btn.wrong');
+        if (!wrong && card.querySelector('.option-btn.correct')) secRight++;
+      });
+      const emoji = secRight === sec.qs.length ? '✅' : secRight >= sec.qs.length/2 ? '🟡' : '🔴';
+      bdHTML += `<div class="breakdown-item"><div class="b-label">${sec.name}</div><div class="b-val" style="color:${secRight===sec.qs.length?'var(--accent)':secRight>=sec.qs.length/2?'var(--accent3)':'var(--wrong)'}">${emoji} ${secRight}/${sec.qs.length}</div></div>`;
+    });
+    document.getElementById('breakdown').innerHTML = bdHTML;
+
+    let msg = '';
+    if (pct >= 90) msg = "Outstanding! You've clearly got a strong grip on this material. 🌟";
+    else if (pct >= 70) msg = "Great work! Review the study notes below for any you got wrong.";
+    else if (pct >= 50) msg = "Good effort! Read the study notes below, then try those questions again.";
+    else msg = "Keep going — study notes are waiting below each tricky question. You've got this! 💪";
+    document.getElementById('scoreMessage').textContent = msg;
+
+    document.getElementById('score-section').style.display = 'block';
+    if (typeof recordScore === 'function') recordScore(pct);
+    document.getElementById('score-section').scrollIntoView({ behavior: 'smooth' });
+
+    // Reveal all pending feedback (test mode)
+    document.querySelectorAll('.feedback.pending-reveal').forEach(fb => {
+      fb.classList.remove('pending-reveal');
+      fb.classList.add('show');
+    });
+
+    // Reveal correct/wrong highlighting on all answered questions (test mode)
+    document.querySelectorAll('.option-btn.correct, .option-btn.wrong').forEach(b => {
+      // already has the class, just make sure it's visible
+    });
+
+    // Inject study notes + retry button on wrong MCQ answers
+    let anyWrong = false;
+    document.querySelectorAll('[data-q]').forEach(card => {
+      const qNum = parseInt(card.dataset.q);
+      if (qNum > MCQ_TOTAL) return;
+      const hasWrong = card.querySelector('.option-btn.wrong');
+      if (!hasWrong) return;
+      anyWrong = true;
+
+      // Don't inject twice
+      if (card.querySelector('.study-note')) return;
+
+      const note = studyNotes[qNum];
+      if (!note) return;
+
+      // Build study note block
+      const noteDiv = document.createElement('div');
+      noteDiv.className = 'study-note';
+      noteDiv.innerHTML = `
+        <div class="study-note-inner">
+          <div class="study-note-text">${note}</div>
+          <button class="retry-btn" onclick="retryQuestion(this)">↩ Try Again</button>
+        </div>
+      `;
+      card.appendChild(noteDiv);
+
+      // Animate in
+      requestAnimationFrame(() => noteDiv.classList.add('show'));
+    });
+  }
+
+  function retryQuestion(btn) {
+    const card = btn.closest('.q-card');
+
+    // Reset all option buttons
+    card.querySelectorAll('.option-btn').forEach(b => {
+      b.disabled = false;
+      b.classList.remove('correct', 'wrong');
+    });
+
+    // Hide feedback
+    const feedback = card.querySelector('.feedback');
+    feedback.classList.remove('show', 'correct-fb', 'wrong-fb', 'pending-reveal');
+
+    // Hide the study note
+    const note = card.querySelector('.study-note');
+    if (note) {
+      note.classList.remove('show');
+      setTimeout(() => note.remove(), 300);
+    }
+
+    // Scroll to question
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Highlight card briefly
+    card.classList.add('retry-highlight');
+    setTimeout(() => card.classList.remove('retry-highlight'), 1200);
+  }
+
+  function resetTest() {
+    submitted = false;
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('correct','wrong');
+    });
+    document.querySelectorAll('.feedback').forEach(fb => {
+      fb.classList.remove('show','correct-fb','wrong-fb','pending-reveal');
+    });
+    document.querySelectorAll('.check-btn').forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = 'Reveal Answer';
+      btn.style.opacity = '1';
+    });
+    document.querySelectorAll('textarea').forEach(t => t.value = '');
+    document.querySelectorAll('.study-note').forEach(n => n.remove());
+    document.getElementById('score-section').style.display = 'none';
+    answered = new Set();
+    updateProgress();
+    document.getElementById('view-test').scrollTop = 0;
+  }
+
+  updateProgress();
+
+</script>
+</body>
+</html>
